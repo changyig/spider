@@ -47,8 +47,8 @@ class BaiduSpider(scrapy.Spider):
         print(sitemap_list)
         for i in sitemap_list:
             url=i.extract()
-            # print(url)
-            yield scrapy.Request(url=url, callback=self.get_keyword_url)
+            print(url)
+            # yield scrapy.Request(url=url, callback=self.get_keyword_url)
         #     print('进行下一个sitemap地址:'+i)
         print('停止运行')
 

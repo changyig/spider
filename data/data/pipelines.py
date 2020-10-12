@@ -19,7 +19,7 @@ class DataPipeline(object):
             use_unicode=True
         )
         # 通过cursor执行增删查改
-        self.cursor = self.connect.cursor();
+        self.cursor = self.connect.cursor()
 
 
     def open_spider(self, spider):

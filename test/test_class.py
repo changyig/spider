@@ -77,14 +77,14 @@ class spider:
                     info = list.find_element_by_class_name('str_info').text
                 print('关键词:' + keyword + '     标题内容为:' + title)
                 print('详情内容：' + info)
-                sql = "INSERT INTO keyword(keyword,info,url,title) VALUES(%s,%s,%s,%s)"
-                self.mysqlNum=self.mysqlNum+1
-                print('成功插入数据库的数量:{}'.format(self.mysqlNum))
                 try:
+                    sql = "INSERT INTO keyword(keyword,info,url,title) VALUES(%s,%s,%s,%s)"
                     self.cursor.execute(sql, (keyword, info, url, title))
                     self.cursor.connection.commit()
+                    self.mysqlNum = self.mysqlNum + 1
+                    print('成功插入数据库的数量:{}'.format(self.mysqlNum))
                 except BaseException as e:
-                    print("错误在这里>>>>>>>>>>>>>", e, "<<<<<<<<<<<<<错误在这里")
+                    print("错误在这里>>>>>>>>>>>>>",e,"<<<<<<<<<<<<<错误在这里")
             except:
                 print('出现错误')
     def get_infos_url(self,url,keyword):

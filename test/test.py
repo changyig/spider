@@ -7,9 +7,9 @@ import pymysql
 from selenium.webdriver.chrome.options import Options
 # chrome_options = Options()
 options = webdriver.ChromeOptions()
-path="D:\\soft\\anaconda\\chromedriver.exe"
+path="D:\\Anaconda3\\chromedriver.exe"
+options.binary_location = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
 options.add_argument("user-data-dir=D:\data\scrapy" )
-options.binary_location = r"C:\Users\CYG\AppData\Local\Google\Chrome\Application\chrome.exe"
 def proxy():
     #https://www.hailiangip.com/tool/page/code 代理商使用的地址
     orderId = "O20101117292659712964"
@@ -31,7 +31,7 @@ def proxy():
 # options.add_argument("--proxy-server=http://123.156.181.176:4281")
 
 # options.add_argument("--headless" )
-browser=webdriver.Chrome(options=options,executable_path=path)
+# browser=webdriver.Chrome(options=options,executable_path=path)
 def make_file(filename):
     if os.path.exists(filename):
         pass
@@ -67,14 +67,16 @@ if __name__=="__main__":
 
     filename='./test_url.txt'
     page = 4
-    url = "https://english.sogou.com/english?query={}&fr=common_nav&b_o_e=1&page={}&ie=utf8&pagenumtype=global"
-    with open(r"./test.txt", 'r', encoding='utf-8') as infile:
-        for line in infile:
-            str = line.rstrip('\n')
-            keyword=str.replace(' ','+')
-            print('当前关键词:{}'.format(keyword))
-            for i in range(1,page):
-                page_url=url.format(keyword,i)
-                print('第{}页获取到的内容,当前链接地址：{}'.format(i, page_url))
-                # write_txt(page_url, filename)
-                get_infos_url(page_url,str)
+    code=input('请输入验证码：')
+    print(code)
+    # url = "https://english.sogou.com/english?query={}&fr=common_nav&b_o_e=1&page={}&ie=utf8&pagenumtype=global"
+    # with open(r"./test.txt", 'r', encoding='utf-8') as infile:
+    #     for line in infile:
+    #         str = line.rstrip('\n')
+    #         keyword=str.replace(' ','+')
+    #         print('当前关键词:{}'.format(keyword))
+    #         for i in range(1,page):
+    #             page_url=url.format(keyword,i)
+    #             print('第{}页获取到的内容,当前链接地址：{}'.format(i, page_url))
+    #             # write_txt(page_url, filename)
+    #             get_infos_url(page_url,str)

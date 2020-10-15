@@ -25,9 +25,11 @@ class spider:
         # 通过cursor执行增删查改
         self.cursor = self.connect.cursor()
         options = webdriver.ChromeOptions()
-        path="D:\\Anaconda3\\chromedriver.exe"
+        # path="D:\\Anaconda3\\chromedriver.exe"
+        path=r"D:\soft\anaconda\chromedriver.exe"
         options.add_argument("user-data-dir=D:\data\scrapy" )
-        options.binary_location = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
+        # options.binary_location = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
+        options.binary_location = r"C:\Users\CYG\AppData\Local\Google\Chrome\Application\chrome.exe"
         # options.add_argument("--headless" )
         self.browser = webdriver.Chrome(options=options, executable_path=path)
     def proxy():

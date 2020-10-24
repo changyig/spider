@@ -12,22 +12,22 @@ def read_xml():
     print(2)
     # url = 'https://www.fruitfuler.com/sitemap.xml'
     # url = 'https://www.urbanjournalism.de/sitemap.xml'
-    url = 'https://agm-technik.de/news/modern_mill_share_prices.html'
+    url = 'https://www.bouwwerken-dekleermaeker-liekens.be/sitemap.xml'
     r = requests.get(url)
     soup = BeautifulSoup(r.text, "xml")
-    print(soup)
-    # count = soup.find_all(name="loc")
-    # num = 0
-    # for i in count:
-    #     url_text = i.string
-    #     res = requests.get(url_text)
-    #     soup2 = BeautifulSoup(res.text, "xml")
-    #     keyword_url = soup2.find_all(name="loc")
-    #     for word in keyword_url:
-    #         keyword = word.string
-    #         if keyword.find('.html') > 0:
-    #             print(keyword)
-    #             test(keyword)
+    # print(soup)
+    count = soup.find_all(name="loc")
+    num = 0
+    for i in count:
+        url_text = i.string
+        res = requests.get(url_text)
+        soup2 = BeautifulSoup(res.text, "xml")
+        keyword_url = soup2.find_all(name="loc")
+        for word in keyword_url:
+            keyword = word.string
+            if keyword.find('.html') > 0:
+                print(keyword)
+                test(keyword)
 
 def test(url):
     path1 = url.split('/')[-1]
@@ -44,4 +44,4 @@ def get_keyword_url():
     print(soup)
     # print(h1)
     # print(description)
-get_keyword_url()
+read_xml()

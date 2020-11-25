@@ -35,7 +35,8 @@ def test(url):
     str = ' '.join(str_list)
     write_keyword(str)
 def get_keyword_url():
-    url = 'https://english.sogou.com/english?query=jaw+crusher&fr=common_nav&b_o_e=1&page=4&ie=utf8&pagenumtype=global'
+    # url = 'https://english.sogou.com/english?query=jaw+crusher&fr=common_nav&b_o_e=1&page=4&ie=utf8&pagenumtype=global'
+    url = 'https://mijisou.com/?q=crusher+machine&category_general=on&time_range=&language=zh-CN&pageno=3'
     r = requests.get(url)
     soup = BeautifulSoup(r.text, "html.parser")
     # title = soup.title.text
@@ -44,4 +45,4 @@ def get_keyword_url():
     print(soup)
     # print(h1)
     # print(description)
-read_xml()
+get_keyword_url()

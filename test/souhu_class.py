@@ -8,6 +8,7 @@ from selenium.webdriver.chrome.options import Options
 # chrome_options = Options()
 class spider:
     def __init__(self,num):
+        self.connect = False
         self.connect = pymysql.connect(
             host="127.0.0.1",
             db="scrapy",
@@ -26,7 +27,7 @@ class spider:
         self.cursor = self.connect.cursor()
         options = webdriver.ChromeOptions()
         # path="D:\\Anaconda3\\chromedriver.exe"
-        path=r"D:\soft\anaconda\chromedriver.exe"
+        path=r"D:\soft\python\chromedriver.exe"
         options.add_argument("user-data-dir=D:\data\scrapy" )
         # options.binary_location = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
         options.binary_location = r"C:\Users\CYG\AppData\Local\Google\Chrome\Application\chrome.exe"
@@ -80,13 +81,23 @@ class spider:
                 print('关键词:' + keyword + '     标题内容为:' + title)
                 print('详情内容：' + info)
                 try:
-                    sql = "INSERT INTO keyword(keyword,info,url,title) VALUES(%s,%s,%s,%s)"
+                    sql = "INSERT INTO infos_scrapy(keyword,info,url,title) VALUES(%s,%s,%s,%s)"
                     self.cursor.execute(sql, (keyword, info, url, title))
                     self.cursor.connection.commit()
                     self.mysqlNum = self.mysqlNum + 1
                     print('成功插入数据库的数量:{}'.format(self.mysqlNum))
                 except BaseException as e:
                     print("错误在这里>>>>>>>>>>>>>",e,"<<<<<<<<<<<<<错误在这里")
+                    print('重新连接数据库')
+                    self.connect = pymysql.connect(
+                        host="127.0.0.1",
+                        db="scrapy",
+                        user="root",
+                        passwd="root",
+                        charset='utf8',
+                        use_unicode=True
+                    )
+                    self.cursor = self.connect.cursor()
             except:
                 print('出现错误')
     def get_infos_url(self,url,keyword):
@@ -96,20 +107,31 @@ class spider:
             self.pare_lists_infos(lists_infos,keyword)
         ##需要验证码的时候
         else:
-            while self.flag:
-                code=input('请输入验证码:')
-                try:
-                    self.browser.find_element_by_id('seccodeInput').send_keys(code)
-                    self.browser.find_element_by_id('submit').click()
-                    time.sleep(5)
-                    lists_infos = self.browser.find_elements_by_class_name('js-fanyi-result')
-                    if lists_infos:
-                        self.pare_lists_infos(lists_infos,keyword)
+            captha=self.browser.find_elements_by_id('seccodeForm')
+            if captha :
+                while self.flag:
+                    code = input('请输入验证码:')
+                    if code == 'skip':
+                        self.get_infos_url(url, keyword)
+                    elif code == 'next':
                         break
                     else:
-                        pass
-                except Exception as e:
-                    print(e)
+                        try:
+                            self.browser.find_element_by_id('seccodeInput').send_keys(code)
+                            self.browser.find_element_by_id('submit').click()
+                            time.sleep(5)
+                            lists_infos = self.browser.find_elements_by_class_name('js-fanyi-result')
+                            if lists_infos:
+                                self.pare_lists_infos(lists_infos, keyword)
+                                break
+                            else:
+                                pass
+                        except Exception as e:
+                            print(e)
+            else:
+                pass
+
+            print('跳出循环')
     def make_url_from_keyword():
         pass
 if __name__=="__main__":

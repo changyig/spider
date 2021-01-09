@@ -18,10 +18,18 @@ class Mysql:
         self.sqlorder=''
         self.sqllimit = ''
         self.sqlupdatefields = ''
+        self.sqlinsert = ''
         # 通过cursor执行增删查改
         self.cursor = self.connect.cursor()
     #操作的表名字
     def table(self,table=''):
+        self.sqltable = ''
+        self.sqlfields = '*'
+        self.sqlwhere = ''
+        self.sqlorder = ''
+        self.sqllimit = ''
+        self.sqlupdatefields = ''
+        self.sqlinsert = ''
         try:
             if table:
                 self.sqltable=table
@@ -81,9 +89,23 @@ class Mysql:
         try:
             if sql=='':
                 sql=self.makesql()
-            print(sql)
+            # print(sql)
             self.cursor.execute(sql)
             list_data = self.cursor.fetchall()
+        except Exception as e:
+            # print('出错了')
+            print(e)
+        return list_data
+
+    #获取所有的记录
+    def count(self,sql='',params=()):
+        list_data = ()
+        try:
+            if sql == '':
+                sql = self.makesql('count')
+            # print(sql)
+            self.cursor.execute(sql)
+            list_data = self.cursor.fetchone()
         except Exception as e:
             # print('出错了')
             print(e)
@@ -105,8 +127,12 @@ class Mysql:
         try:
             if type=='select':
                 self.sql='select '+self.sqlfields+' from '+self.sqltable+self.sqlwhere+self.sqlorder+self.sqllimit
-            if type=='update':
+            elif type=='update':
                 self.sql = 'update ' + self.sqltable + self.sqlupdatefields + self.sqlwhere + self.sqlorder + self.sqllimit
+            elif type=='insert':
+                self.sql = 'insert into ' + self.sqltable + self.sqlinsert
+            elif type=='count':
+                self.sql = 'select count(*) as num from ' + self.sqltable + self.sqlwhere + self.sqlorder + self.sqllimit
             # print(self.sql)
             return self.sql
         except Exception as e:
@@ -121,7 +147,12 @@ class Mysql:
                 for list in lists:
                     str1 = ' '
                     (field,value), = list.items()
-                    str1 = ' '+ field + '=' + str(value)
+                    if isinstance(value,int):
+                        str1 = ' '+ field + '=' + str(value)
+                    elif isinstance(value,str):
+                        str1 = ' '+ field + '=' + '"'+str(value)+ '"'
+                    else:
+                        str1 = ' '+ field + '=' + '"'+str(value)+ '"'
                     fields_list.append(str1)
                 str1 = ' , '.join(fields_list)
                 self.sqlupdatefields = ' set '+str1
@@ -134,10 +165,46 @@ class Mysql:
             print(e)
             self.connect.rollback()
             return self
-
+    #更新指定的数据记录 lists=[{'id':5},{'name':'abc'}]
+    def insert(self,lists=[]):
+        try:
+            if lists:
+                fields_name = []
+                fields_value = []
+                str1 = ' '
+                for list in lists:
+                    (field,value), = list.items()
+                    fields_name.append(field)
+                    if isinstance(value,str):
+                        fields_value.append('"'+str(self.filter_str(value))+ '"')
+                    elif isinstance(value,int):
+                        fields_value.append(str(value))
+                    else:
+                        fields_value.append('"'+str(value)+ '"')
+                self.sqlinsert = ' ('+' , '.join(fields_name)+') values ('+' , '.join(fields_value)+')'
+            # print(self.sqlinsert)
+            sql=self.makesql('insert')
+            # print(sql)
+            self.cursor.execute(sql)
+            self.connect.commit()
+            return self.connect.affected_rows()
+        except Exception as e:
+            print(e)
+            self.connect.rollback()
+            return self
+    def filter_str(self,str=''):
+        str=str.strip().replace("'",'').replace('"','')
+        return str
 if __name__=="__main__":
+    pass
     mysql=Mysql()
-    where_data=[{'id':['=',1]}]
-    update_data=[{'sort':3}]
-    res=mysql.table('keyword').where(where_data).update(update_data)
+    # where_data=[{'id':['=',2]}]
+    # update_data=[{'catname':"we"}]
+    insert_data=[{'keyword':"we"},{'title':"we"},{'answer':"wsssse"},{'uid':6}]
+    # res=mysql.table('category').where(where_data).update(update_data)
+    res=mysql.table('zhidao_scrapy_test').where([{'translate':['=',0]}]).count()
+    insert_data=[{'title': '破碎机P0701"0"00是啥意思？'}, {'answer': '破碎机p0701000是啥意思？就是这个破碎机的型号，这个型号就是这个，以后东西坏了啥？这个型号买就行'}, {'uid': 3}]
+    res=mysql.table('zhidao_scrapy_en').insert(insert_data)
+    update_data = [{'keyword':'破碎机有哪几种？'}]
+    # res=mysql.table('zhidao_scrapy_test').where([{'id':['=',1]}]).update(update_data)
     print(res)

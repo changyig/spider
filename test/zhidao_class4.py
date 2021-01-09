@@ -68,6 +68,8 @@ class spider:
         except Exception as e:
             print(e)
             return False
+    def md5_str_onlyid(self,onlytext=''):
+        pass
     ##问答页内容的数据存入到数据库 : 抓取到的问答页面->解析和过滤数据->存入数据库（数据唯一性判断）
     def answer_insert_mysql(self,data,tablename='zhidao_scrapy'):
         str_md5=(data['url']+str(data['author'])).encode(encoding='UTF-8')

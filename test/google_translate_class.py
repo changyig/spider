@@ -35,8 +35,13 @@ class Googletranslate:
             data = {
                 'f.req':f'[[["MkEWBc","[[\\"{text}\\",\\"auto\\",\\"en\\",true],[null]]",null,"generic"]]]'
             }  # text则是你要翻译的内容
-            res = requests.post(self.url,headers=self.headers,data=data).text  # 获取返回的结果
-            # print(res)
+            try:
+                res = requests.post(self.url,headers=self.headers,data=data,timeout=3)  # 获取返回的结果
+            except Exception as e:
+                print('超时出现了')
+                return None
+            # print(res.status_code)
+            res=res.text
             pattern = '\)\]\}\'\s*\d{3,5}\s*\[(.*)\s*'  # 提取需要的部分
             part1 = re.findall(pattern,res)
             part1_list = json.loads(part1[0])  # 字符串转列表

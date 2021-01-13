@@ -42,8 +42,10 @@ class Mysql:
             if op:
                 if op[0]=='=':
                     pass
-                if op[0]=='like':
-                    op[1]= "'%"+str(op[1])+"%'"
+                elif op[0]=='like':
+                    op[1]= "%"+str(op[1])+"%"
+                elif op[0]=='not like':
+                    op[1]= "%"+str(op[1])+"%"
         except Exception as e:
             print(e)
         return op
@@ -56,10 +58,17 @@ class Mysql:
                     str1 = ' '
                     (field,value), = list.items()
                     value = self.pare(value)
-                    str1 =' '+ field + ' ' + str(value[0]) + ' ' + str(value[1])
+                    if isinstance(value[1],int):
+                        value[1] = str(value[1])
+                    elif isinstance(value[1],str):
+                        value[1] = '"'+str(value[1])+ '"'
+                    str1 =' '+ field + ' ' + str(value[0]) + ' ' + value[1]
                     where_list.append(str1)
                 str1=' and '.join(where_list)
-                self.sqlwhere=self.sqlwhere+' where '+str1
+                if self.sqlwhere=='':
+                    self.sqlwhere=self.sqlwhere+' where '+str1
+                else:
+                    self.sqlwhere=self.sqlwhere+' and  '+str1
         except Exception as e:
             print(e)
         return self
@@ -78,6 +87,7 @@ class Mysql:
         if sql=='':
             sql=self.makesql()
         try:
+            # print(sql)
             self.cursor.execute(sql)
             result = self.cursor.fetchone()
         except Exception as e:
@@ -157,7 +167,7 @@ class Mysql:
                 str1 = ' , '.join(fields_list)
                 self.sqlupdatefields = ' set '+str1
             sql=self.makesql('update')
-            # print(sql)
+            print(sql)
             self.cursor.execute(sql)
             self.connect.commit()
             return self.connect.affected_rows()

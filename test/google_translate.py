@@ -20,6 +20,7 @@ class google:
         self.currentLine=0
         self.mysqlNum=0  #插入数据库的数量
         self.mysqlrelation=0  #插入数据库的数量
+        self.translateNum=0  #插入数据库的数量
         self.options = webdriver.ChromeOptions()
         # self.path="D:\\Anaconda3\\chromedriver.exe"
         self.path=r"D:\soft\python\chromedriver.exe"
@@ -102,20 +103,26 @@ class google:
             for line in res:
                 translate=[]
                 print('翻译id:{}的回答,翻译结果为:'.format(line[0]))
-                translate.append({'title':self.translate_zh_en(line[1])})
-                translate.append({'answer':self.translate_zh_en(line[2])})
-                translate.append({'uid':line[0]})
-                # print(translate)
-                insert_flag=self.mysql.table('zhidao_scrapy_en').insert(translate)
-                if insert_flag:
-                    update_data = [{'translate':1}]
-                    update_flag=self.mysql.table(tablename).where([{'id':['=',line[0]]}]).update(update_data)
-                    if update_flag:
-                        print('成功翻译插入数据并且更新数据库成功')
+                title=self.translate_zh_en(line[1])
+                answer=self.translate_zh_en(line[2])
+                if title and answer:
+                    translate.append({'title':title})
+                    translate.append({'answer':answer})
+                    translate.append({'uid':line[0]})
+                    insert_flag = self.mysql.table('zhidao_scrapy_en').insert(translate)
+                    if insert_flag:
+                        update_data = [{'translate':1}]
+                        update_flag = self.mysql.table(tablename).where([{'id':['=',line[0]]}]).update(update_data)
+                        if update_flag:
+                            print('成功翻译插入数据并且更新数据库成功')
+                        else:
+                            print('成功翻译插入数据但是更新数据库失败')
                     else:
-                        print('成功翻译插入数据但是更新数据库失败')
+                        print('翻译插入数据失败')
                 else:
-                    print('翻译插入数据失败')
+                    pass
+                # print(translate)
+
     #打开浏览器-> 并且把翻译界面打开 ->调用数据库->循环翻译
     def mysql_google_translate(self):
         tablename='zhidao_scrapy'
@@ -126,27 +133,33 @@ class google:
             if all[0]==0:
                 self.flag=False
                 break
-            res=self.mysql.table(tablename).field(['id','title','answer']).where([{'translate':['=',0]}]).limit(10).select()
+            res=self.mysql.table(tablename).field(['id','title','answer','date']).where([{'translate':['=',0]}]).limit(10).select()
             for line in res:
-                # print(line)
                 translate=[]
-                print('翻译id:{}的回答,翻译结果为:'.format(line[0]))
-                translate.append({'title':google_object.googleTranslate(line[1])})
-                # print('回答内容')
-                # print(line[2])
-                translate.append({'answer':google_object.googleTranslate(line[2])})
-                translate.append({'uid':line[0]})
-                # print(translate)
-                insert_flag=self.mysql.table('zhidao_scrapy_en').insert(translate)
-                if insert_flag:
-                    update_data = [{'translate':1}]
-                    update_flag=self.mysql.table(tablename).where([{'id':['=',line[0]]}]).update(update_data)
-                    if update_flag:
-                        print('成功翻译插入数据并且更新数据库成功')
+                title = google_object.googleTranslate(line[1])
+                answer = google_object.googleTranslate(line[2])
+                if title and answer:
+                    translate.append({'title':title})
+                    translate.append({'answer':answer})
+                    translate.append({'uid':line[0]})
+                    translate.append({'date':line[3]})
+                    print('翻译id:{}的回答,翻译结果为标题:{},内容:{}'.format(line[0],translate[0]['title'][0:20],translate[1]['answer'][0:30],))
+                    insert_flag=self.mysql.table('zhidao_scrapy_en').insert(translate)
+                    if insert_flag:
+                        update_data = [{'translate':1}]
+                        update_flag=self.mysql.table(tablename).where([{'id':['=',line[0]]}]).update(update_data)
+                        if update_flag:
+                            print('成功翻译插入数据并且更新数据库成功')
+                        else:
+                            print('成功翻译插入数据但是更新数据库失败')
                     else:
-                        print('成功翻译插入数据但是更新数据库失败')
+                        print('翻译插入数据失败')
                 else:
-                    print('翻译插入数据失败')
+                    self.translateNum=self.translateNum+1
+                    if self.translateNum>10:
+                        print('翻译超时不在循环')
+                        self.flag = False
+                        break
     def filter_str(self,string1=''):
         # string1=string1.replace("\n",'<br/>')
         cop = re.compile("[^\u4e00-\u9fa5^a-z^A-Z^0-9^（^）^(^)^:^,^.^。^-^%^!^?^\n]")  # 匹配不是中文、大小写、数字的其他字符

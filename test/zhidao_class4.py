@@ -8,33 +8,36 @@ from selenium.webdriver.chrome.options import Options
 # chrome_options = Options()
 import time
 import hashlib
+import urllib
+import sys
+import re
+from mysql_class import Mysql
 class spider:
-    def __init__(self):
-        self.connect = False
-        self.connect = pymysql.connect(
-            host="127.0.0.1",
-            db="scrapy",
-            user="root",
-            passwd="root",
-            charset='utf8',
-            use_unicode=True
-        )
+    def __init__(self,mysql):
+        self.mysql=mysql
         #验证码不正确时一直输入验证码
         self.flag=True
         self.start_time = time.time()
         self.currentLine=0
+        self.currentPage=0 #主页面当前页码
+        self.secondPage = 1 #问答页面当前页码
+        self.pattern='破.*机|矿山|粉.*机|砂机|磨.*机|破.*碎'
+        self.keyword='破.*机|矿山|粉.*机|砂机'
+
         self.mysqlNum=0  #插入数据库的数量
         self.mysqlrelation=0  #插入数据库的数量
         # 通过cursor执行增删查改
-        self.cursor = self.connect.cursor()
+        # self.cursor = self.connect.cursor()
         self.options = webdriver.ChromeOptions()
         # self.path="D:\\Anaconda3\\chromedriver.exe"
         self.path=r"D:\soft\python\chromedriver.exe"
         self.options.add_argument("user-data-dir=D:\data\scrapy" )
         # self.options.binary_location = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
         self.options.binary_location = r"C:\Users\CYG\AppData\Local\Google\Chrome\Application\chrome.exe"
-        # options.add_argument("--headless" )
+        # self.options.add_argument("--headless" )
         self.browser = webdriver.Chrome(options=self.options, executable_path=self.path)
+        #隐形等待
+        # self.browser.implicitly_wait(10)
 
     '''
         依据不同的选择器方式，获取页面的中想要获取的指定的元素 
@@ -68,18 +71,47 @@ class spider:
         except Exception as e:
             print(e)
             return False
-    def md5_str_onlyid(self,onlytext=''):
-        pass
+    def md5_str_onlyid(self,data=None):
+        try:
+            url=data['url']
+            url=url.split('?')
+            str_md5=(url[0]+str(data['page'])+str(data['author'])).encode(encoding='UTF-8')
+            str_md5= hashlib.md5(str_md5).hexdigest()
+            return str_md5
+        except Exception as e:
+            print(e)
+            return 'error'
+    #判断主页面的url和标题是否和主关键词相关，重复返回False 不重复返回True
+    def check_onlyid(self,url='',title=''):
+        try:
+            match=re.search(self.pattern,title)
+            if match is None:
+                print('内容不相关跳过:{},'.format(title))
+                return False
+            else:
+                # url=url.split('?')
+                # str_md5=(url[0]+str(1)).encode(encoding='UTF-8')
+                str_md5=(url+str(1)).encode(encoding='UTF-8')
+                str_md5= hashlib.md5(str_md5).hexdigest()
+                where_data=[{'onlyid':['=',str(str_md5)]}]
+                find=self.mysql.table('zhidao_scrapy').field(['id','onlyid']).where(where_data).find()
+                if find:
+                    print('地址重复跳过:{},数据库id:{}'.format(url[0],find[0]))
+                    return False
+                else:
+                    return True
+        except Exception as e:
+            print(e)
+            return True
     ##问答页内容的数据存入到数据库 : 抓取到的问答页面->解析和过滤数据->存入数据库（数据唯一性判断）
     def answer_insert_mysql(self,data,tablename='zhidao_scrapy'):
-        str_md5=(data['url']+str(data['author'])).encode(encoding='UTF-8')
-        onlyid= hashlib.md5(str_md5).hexdigest()
+        onlyid=self.md5_str_onlyid(data)
         try:
-            sql = "INSERT INTO {}(keyword,title,answer,url,onlyid,date) VALUES(%s,%s,%s,%s,%s,%s)".format(tablename)
-            self.cursor.execute(sql,(data['title'],data['title'],data['content'],data['url'],onlyid,data['date']))
-            self.cursor.connection.commit()
+            insert_data=[{'keyword':data['title']},{'title':data['title']},{'answer':data['content']},{'url':data['url']},{'onlyid':onlyid},{'date':data['date']},{'page':data['page']},{'ranking':data['author']}]
+            self.mysql.table(tablename).insert(insert_data)
             self.mysqlNum = self.mysqlNum + 1
-            print('问答页面成功插入数据库的数量:{},title:{}'.format(self.mysqlNum,data['title']))
+            # print('问答页面成功插入数据库的数量:{},title:{}'.format(self.mysqlNum,data['title']))
+            print('问答页面成功插入数据库的数量:{},title:{},内容：{}'.format(self.mysqlNum,data['title'][0:20],data['content'][0:20]))
         except BaseException as e:
             print("问答页面错误在这里>>>>>>>>>>>>>",e,"<<<<<<<<<<<<<错误在这里")
         pass
@@ -87,23 +119,24 @@ class spider:
     ##相关性标题的数据存入到数据库 : 抓取到主页面相关问题->解析和过滤数据->存入数据库（数据唯一性判断）
     def relation_insert_mysql(self,data,tablename='zhidao_relation'):
         try:
-            sql = "INSERT INTO {}(keyword,url,title,origin,date) VALUES(%s,%s,%s,%s,%s)".format(tablename)
-            self.cursor.execute(sql,(data['title'],data['url'],data['title'],data['origin'],data['date']))
-            self.cursor.connection.commit()
-            self.mysqlrelation = self.mysqlrelation + 1
-            print('主页面或者问答页面话题相关性成功插入数据库的数量:{}，title:{}'.format(self.mysqlrelation,data['title']))
+            insert_flag=insert_data=[{'keyword':data['title']},{'title':data['title']},{'url':data['url']},{'origin':data['origin']},{'date':data['date']}]
+            if insert_flag:
+                self.mysql.table(tablename).insert(insert_data)
+                self.mysqlNum = self.mysqlNum + 1
+                self.mysqlrelation = self.mysqlrelation + 1
+                print('主页面,问答页面h话题插入成功:{}，title:{},url:{}'.format(self.mysqlrelation,data['title'][0:10],data['url'][33:70]))
+            else:
+                print('主页面,问答页面话题插入失败')
+                pass
         except BaseException as e:
             print("主页面或者问答页面话题相关性成功插入数据库的数量错误在这里>",e,"<错误在这里")
 
-    ##处理获取到的数据:
-    def filter_data(self,data):
-        pass
     ##处理获取到url链接地址
     def filter_url(self,url):
         res = url.split("'")
         return res[-2]
 
-    #获取问答页面下的相关性问题
+    #获取问答页面下的相关性问题 问答->相关标题
     def get_footer_relate(self):
         #相关问题
         data={}
@@ -123,8 +156,6 @@ class spider:
                         self.relation_insert_mysql(data)
                     else:
                         pass
-                    # print(item_lists)
-                    # print(data)
     #获取主页面下的相关性标题和链接
     def get_footer_keyword(self):
         data={}
@@ -149,11 +180,11 @@ class spider:
 
     #问答页抓取相关内容 注意流程：打开新的界面->切换成新的窗口句柄->抓取内容->关闭新窗口句柄->返回上一个窗口句柄
     def anwser_infos(self,url=''):
-        time.sleep(1)
         cmd = 'window.open("' + url + '")'
         self.browser.execute_script(cmd)
         window = self.browser.window_handles
         self.browser.switch_to.window(window[1])
+        time.sleep(1)
         article = self.browser.find_element_by_tag_name('article')
         title = self.try_selector('xpath',self.browser,'//h1[@accuse="qTitle"]')
         if title:
@@ -184,6 +215,8 @@ class spider:
                             print('含有隐藏的数据')
                             self.browser.execute_script("arguments[0].click();",answer_mask)
                 time.sleep(1)
+                #判断当前问答页的页码
+                self.current_second_page()
                 #获取需要的元素
                 answers = self.try_selector('css',article,".bd,.answer",True)
                 i = 1
@@ -195,7 +228,6 @@ class spider:
                         # print(content.text)
                         data_content = content.text
                     else:
-                        print('.line.content div')
                         line = self.try_selector('css',answer,"div[class='line content'] div")
                         if line:
                             # print(line.text)
@@ -205,6 +237,7 @@ class spider:
                     data['author'] = i
                     data['content'] = data_content
                     data['url'] = url
+                    data['page'] = self.secondPage
                     data['date'] = time.strftime("%Y-%m-%d %H:%M:%S",time.localtime())
                     self.answer_insert_mysql(data)
                     # print(data)
@@ -216,28 +249,47 @@ class spider:
                 next_page = self.try_selector('css',self.browser,"a[class='pager-next']")
                 if next_page:
                     next_page_url = next_page.get_attribute("href")
+                    self.secondPage=int(self.secondPage)+1
                     print('下一页链接地址:{}'.format(next_page_url))
                     self.browser.close()
                     self.browser.switch_to.window(window[0])
                     self.anwser_infos(next_page_url)
                 else:
-                    print('没有分页关闭第二层分页的窗口')
                     self.browser.close()
                     self.browser.switch_to.window(window[0])
             except Exception as e:
+                self.browser.close()
+                self.browser.switch_to.window(window[0])
                 print(e)
-        pass
+        else:
+            self.browser.close()
+            self.browser.switch_to.window(window[0])
+            print('没有找到相关性的文章')
+
+    #判断主界面的的当前页面 默认为零
+    def current_page(self):
+        page = self.try_selector('css',self.browser,'div.pager')
+        if page:
+            b = page.find_element_by_tag_name('b')
+            if b:
+                self.currentPage = int(b.text)
+    #判断问答页当前页面 默认为零
+    def current_second_page(self):
+        page=self.try_selector('css',self.browser,'div.pager')
+        if page:
+            b=page.find_element_by_tag_name('b')
+            if b:
+                self.secondPage=int(b.text)
+
     #根据关键词抓取主的内容
     def get_infos_url(self,url,url2='',flag=False):
-        # self.browser.get(url)
         self.browser.execute_script("window.location.href = '{}';".format(url))
+        self.current_page()
+        print('主页面当前页面页码是：{}'.format(self.currentPage))
         if flag and url2:
             self.browser.execute_script("window.location.href = '{}';".format(url2))
-        # cookies=self.browser.get_cookies()
-        # print(cookies)
-        # for cookie in cookies:
-        #     self.browser.add_cookie(cookie)
         try:
+            pass
             # infos_container = self.browser.find_element_by_xpath('//div[@class="list-inner"]')
             infos_container = self.try_selector('xpath',self.browser,'//div[@class="list-inner"]')
             if infos_container:
@@ -245,9 +297,14 @@ class spider:
                 for infos in infos_list:
                     title=infos.find_element_by_xpath('.//a')
                     a_url=title.get_attribute("href")
-                    if a_url:
-                        pass
-                        self.anwser_infos(a_url)
+                    a_title=title.text
+                    if a_url and a_title:
+                        res=self.check_onlyid(a_url,a_title)
+                        if res:
+                            print('bu跳过')
+                            self.anwser_infos(a_url)
+                        else:
+                            print('跳过')
             #页面底部相关信息的链接 获取->存入数据库->下次调用
             foot_list = self.try_selector('xpath',self.browser,'//div[@class="list-footer"]')
             if foot_list:
@@ -262,12 +319,28 @@ class spider:
                 self.get_infos_url(next_page_url)
         except Exception as e:
             print(e)
-
+    def main(self):
+        tablename='zhidao_relation'
+        while self.flag:
+            find=self.mysql.table(tablename).field(['id','keyword']).where([{'count':['=',0]}]).find()
+            print(find)
+            if find:
+                keyword=find[1]
+                keyword=urllib.parse.quote(keyword,encoding="gbk")
+                url="https://zhidao.baidu.com/search?lm=0&rn=10&pn=0&fr=search&ie=gbk&word={}".format(keyword)
+                print('主页面当前关键词:{},url链接地址：{}'.format(find[1],url))
+                spider.get_infos_url(url)
+                update_data=[{'count':1}]
+                update_flag=self.mysql.table(tablename).where([{'id':['=',find[0]]}]).update(update_data)
+                update_flag=self.mysql.table(tablename).where([{'count':['=',0]},{'keyword':['not like','破%机']}]).where([{'keyword':['not like','破%碎']}]).update([{'count':3}])
 if __name__=="__main__":
-    keyword = '破碎机'
+    myql=Mysql()
+    spider=spider(myql)
+
+    # keyword =spider.main()
     # url2 = "https://zhidao.baidu.com/search?word=%C6%C6%CB%E9%BB%FA%D3%D0%C4%C4%D0%A9%D6%D6%C0%E0&ie=gbk&site=-1&sites=0&date=0&pn=100"
     # url1 = "https://zhidao.baidu.com/question/1430633872239462139.html?qbl=relate_question_0&word=%C6%C6%CB%E9%BB%FA"
-    url = "https://zhidao.baidu.com/search?lm=0&rn=10&pn=0&fr=search&ie=gbk&word=%B7%DB%CB%E9%BB%FA"
-    spider=spider()
+    url = "https://zhidao.baidu.com/search?ct=17&pn=0&tn=ikaslist&rn=10&fr=wwwt&ie=utf-8&word=%E8%B4%AD%E4%B9%B0%E7%A0%B4%E7%A2%8E%E6%9C%BA%E6%B3%A8%E6%84%8F%E7%9A%84%E9%97%AE%E9%A2%98"
     spider.get_infos_url(url)
+    # spider.md5_str_onlyid()
     # spider.get_infos_url(url1,url2,True)

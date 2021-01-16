@@ -136,8 +136,8 @@ class google:
             res=self.mysql.table(tablename).field(['id','title','answer','date']).where([{'translate':['=',0]}]).limit(10).select()
             for line in res:
                 translate=[]
-                title = google_object.googleTranslate(line[1])
-                answer = google_object.googleTranslate(line[2])
+                title = google_object.googleTranslate2(line[1])
+                answer = google_object.googleTranslate2(line[2])
                 if title and answer:
                     translate.append({'title':title})
                     translate.append({'answer':answer})

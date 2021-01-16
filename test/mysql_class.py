@@ -167,7 +167,7 @@ class Mysql:
                 str1 = ' , '.join(fields_list)
                 self.sqlupdatefields = ' set '+str1
             sql=self.makesql('update')
-            print(sql)
+            # print(sql)
             self.cursor.execute(sql)
             self.connect.commit()
             return self.connect.affected_rows()

@@ -289,8 +289,6 @@ class spider:
         if flag and url2:
             self.browser.execute_script("window.location.href = '{}';".format(url2))
         try:
-            pass
-            # infos_container = self.browser.find_element_by_xpath('//div[@class="list-inner"]')
             infos_container = self.try_selector('xpath',self.browser,'//div[@class="list-inner"]')
             if infos_container:
                 infos_list=infos_container.find_elements_by_tag_name('dl')
@@ -308,7 +306,6 @@ class spider:
             #页面底部相关信息的链接 获取->存入数据库->下次调用
             foot_list = self.try_selector('xpath',self.browser,'//div[@class="list-footer"]')
             if foot_list:
-                # print(foot_list.text)
                 self.get_footer_keyword()
                 pass
             #下一页
@@ -337,10 +334,10 @@ if __name__=="__main__":
     myql=Mysql()
     spider=spider(myql)
 
-    # keyword =spider.main()
+    keyword =spider.main()
     # url2 = "https://zhidao.baidu.com/search?word=%C6%C6%CB%E9%BB%FA%D3%D0%C4%C4%D0%A9%D6%D6%C0%E0&ie=gbk&site=-1&sites=0&date=0&pn=100"
     # url1 = "https://zhidao.baidu.com/question/1430633872239462139.html?qbl=relate_question_0&word=%C6%C6%CB%E9%BB%FA"
-    url = "https://zhidao.baidu.com/search?ct=17&pn=0&tn=ikaslist&rn=10&fr=wwwt&ie=utf-8&word=%E8%B4%AD%E4%B9%B0%E7%A0%B4%E7%A2%8E%E6%9C%BA%E6%B3%A8%E6%84%8F%E7%9A%84%E9%97%AE%E9%A2%98"
-    spider.get_infos_url(url)
+    # url = "https://zhidao.baidu.com/search?ct=17&pn=0&tn=ikaslist&rn=10&fr=wwwt&ie=utf-8&word=%E8%B4%AD%E4%B9%B0%E7%A0%B4%E7%A2%8E%E6%9C%BA%E6%B3%A8%E6%84%8F%E7%9A%84%E9%97%AE%E9%A2%98"
+    # spider.get_infos_url(url)
     # spider.md5_str_onlyid()
     # spider.get_infos_url(url1,url2,True)

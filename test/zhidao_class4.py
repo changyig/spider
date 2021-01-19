@@ -21,8 +21,12 @@ class spider:
         self.currentLine=0
         self.currentPage=0 #主页面当前页码
         self.secondPage = 1 #问答页面当前页码
-        self.pattern='破.*机|矿山|粉.*机|砂机|磨.*机|破.*碎'
+        # self.pattern='破.*机|矿山|粉.*机|砂机|磨.*机|破.*碎|制.*机'
+        self.pattern='砂机|制.*机'
         self.keyword='破.*机|矿山|粉.*机|砂机'
+        self.answerTable='zhidao_scrapy_sand'
+        self.relationTable='zhidao_relation_sand'
+        self.translateTable='zhidao_scrapy_sand_en'
 
         self.mysqlNum=0  #插入数据库的数量
         self.mysqlrelation=0  #插入数据库的数量
@@ -34,7 +38,7 @@ class spider:
         self.options.add_argument("user-data-dir=D:\data\scrapy" )
         # self.options.binary_location = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
         self.options.binary_location = r"C:\Users\CYG\AppData\Local\Google\Chrome\Application\chrome.exe"
-        # self.options.add_argument("--headless" )
+        self.options.add_argument("--headless" )
         self.browser = webdriver.Chrome(options=self.options, executable_path=self.path)
         #隐形等待
         # self.browser.implicitly_wait(10)
@@ -153,7 +157,7 @@ class spider:
                         data['title']=item_span.text
                         data['origin'] = 2
                         data['date'] = time.strftime("%Y-%m-%d %H:%M:%S",time.localtime())
-                        self.relation_insert_mysql(data)
+                        self.relation_insert_mysql(data,self.relationTable)
                     else:
                         pass
     #获取主页面下的相关性标题和链接
@@ -172,7 +176,7 @@ class spider:
                         data['origin']=1
                         data['date'] = time.strftime("%Y-%m-%d %H:%M:%S",time.localtime())
                         # print(data)
-                        self.relation_insert_mysql(data)
+                        self.relation_insert_mysql(data,self.relationTable)
             else:
                 print('无内容item')
         else:
@@ -239,7 +243,7 @@ class spider:
                     data['url'] = url
                     data['page'] = self.secondPage
                     data['date'] = time.strftime("%Y-%m-%d %H:%M:%S",time.localtime())
-                    self.answer_insert_mysql(data)
+                    self.answer_insert_mysql(data,self.answerTable)
                     # print(data)
                     i = i + 1
                 #获取问答页面下的相关问题
@@ -317,7 +321,7 @@ class spider:
         except Exception as e:
             print(e)
     def main(self):
-        tablename='zhidao_relation'
+        tablename=self.relationTable
         while self.flag:
             find=self.mysql.table(tablename).field(['id','keyword']).where([{'count':['=',0]}]).find()
             print(find)
@@ -329,7 +333,7 @@ class spider:
                 spider.get_infos_url(url)
                 update_data=[{'count':1}]
                 update_flag=self.mysql.table(tablename).where([{'id':['=',find[0]]}]).update(update_data)
-                update_flag=self.mysql.table(tablename).where([{'count':['=',0]},{'keyword':['not like','破%机']}]).where([{'keyword':['not like','破%碎']}]).update([{'count':3}])
+                update_flag=self.mysql.table(tablename).where([{'count':['=',0]},{'keyword':['not like','破%机']}]).orwhere([{'keyword':['not like','破%碎']}]).orwhere([{'keyword':['not like','制%机']}]).orwhere([{'keyword':['not like','砂机']}]).update([{'count':3}])
 if __name__=="__main__":
     myql=Mysql()
     spider=spider(myql)
@@ -337,7 +341,7 @@ if __name__=="__main__":
     keyword =spider.main()
     # url2 = "https://zhidao.baidu.com/search?word=%C6%C6%CB%E9%BB%FA%D3%D0%C4%C4%D0%A9%D6%D6%C0%E0&ie=gbk&site=-1&sites=0&date=0&pn=100"
     # url1 = "https://zhidao.baidu.com/question/1430633872239462139.html?qbl=relate_question_0&word=%C6%C6%CB%E9%BB%FA"
-    # url = "https://zhidao.baidu.com/search?ct=17&pn=0&tn=ikaslist&rn=10&fr=wwwt&ie=utf-8&word=%E8%B4%AD%E4%B9%B0%E7%A0%B4%E7%A2%8E%E6%9C%BA%E6%B3%A8%E6%84%8F%E7%9A%84%E9%97%AE%E9%A2%98"
+    # url = "https://zhidao.baidu.com/search?word=%D6%C6%C9%B0%BB%FA"
     # spider.get_infos_url(url)
     # spider.md5_str_onlyid()
     # spider.get_infos_url(url1,url2,True)

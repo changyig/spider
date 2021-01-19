@@ -72,6 +72,28 @@ class Mysql:
         except Exception as e:
             print(e)
         return self
+    def orwhere(self,lists=[]):
+        try:
+            if lists:
+                where_list=[]
+                for list in lists:
+                    str1 = ' '
+                    (field,value), = list.items()
+                    value = self.pare(value)
+                    if isinstance(value[1],int):
+                        value[1] = str(value[1])
+                    elif isinstance(value[1],str):
+                        value[1] = '"'+str(value[1])+ '"'
+                    str1 =' '+ field + ' ' + str(value[0]) + ' ' + value[1]
+                    where_list.append(str1)
+                str1=' or '.join(where_list)
+                if self.sqlwhere=='':
+                    self.sqlwhere=self.sqlwhere+' where '+str1
+                else:
+                    self.sqlwhere=self.sqlwhere+' or  '+str1
+        except Exception as e:
+            print(e)
+        return self
 
     #获取数据表中的字段 注意里面必须是字符串不能是其他类型的数据
     def field(self,fields='*'):

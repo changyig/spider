@@ -1,6 +1,7 @@
 # coding:utf-8
 from urllib import request,parse
 import json
+import requests
 import math
 
 def translate(content):
@@ -53,8 +54,20 @@ def split_string(string='',maxlen=20):
         return result_list
     else:
         return result_list.append(string)
+def get_ip():
+    url='http://api.shenlongip.com/ip?key=bblmg35e&pattern=json&count=1&need=1000&protocol=2'
+    req =requests.get(url)
+    data=json.loads(req.text)
+    print(req.text)
+    print(data)
+    print(data['data'][0]['ip'])
+    print(data['data'][0]['port'])
+    proxy = {
+        'http':'121.43.170.207:3128'
+    }
+    proxy2 = {
+        'http':str(data['data'][0]['ip'])+':'+str(data['data'][0]['port'])
+    }
+    print(proxy2)
 if __name__ == '__main__':
-    # content = input("请输入您要翻译的内容：")
-    string='周昂s。地方哈。达覅骄傲的发电附sssss。近安静的覅的方法将。dfadfa安抚骄傲'
-    res=split_string(string)
-    print(res)
+    res=get_ip()

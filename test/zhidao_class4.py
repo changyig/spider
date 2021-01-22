@@ -38,7 +38,7 @@ class spider:
         self.options.add_argument("user-data-dir=D:\data\scrapy" )
         # self.options.binary_location = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
         self.options.binary_location = r"C:\Users\CYG\AppData\Local\Google\Chrome\Application\chrome.exe"
-        self.options.add_argument("--headless" )
+        # self.options.add_argument("--headless" )
         self.browser = webdriver.Chrome(options=self.options, executable_path=self.path)
         #隐形等待
         # self.browser.implicitly_wait(10)
@@ -333,11 +333,10 @@ class spider:
                 spider.get_infos_url(url)
                 update_data=[{'count':1}]
                 update_flag=self.mysql.table(tablename).where([{'id':['=',find[0]]}]).update(update_data)
-                update_flag=self.mysql.table(tablename).where([{'count':['=',0]},{'keyword':['not like','破%机']}]).orwhere([{'keyword':['not like','破%碎']}]).orwhere([{'keyword':['not like','制%机']}]).orwhere([{'keyword':['not like','砂机']}]).update([{'count':3}])
+                update_flag=self.mysql.table(tablename).where([{'count':['=',0]},{'keyword':['not like','制砂']}]).where([{'keyword':['not like','制%机']}]).where([{'keyword':['not like','砂机']}]).update([{'count':3}])
 if __name__=="__main__":
     myql=Mysql()
     spider=spider(myql)
-
     keyword =spider.main()
     # url2 = "https://zhidao.baidu.com/search?word=%C6%C6%CB%E9%BB%FA%D3%D0%C4%C4%D0%A9%D6%D6%C0%E0&ie=gbk&site=-1&sites=0&date=0&pn=100"
     # url1 = "https://zhidao.baidu.com/question/1430633872239462139.html?qbl=relate_question_0&word=%C6%C6%CB%E9%BB%FA"

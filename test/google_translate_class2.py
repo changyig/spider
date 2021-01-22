@@ -65,7 +65,7 @@ class Googletranslate:
             'f.req':f'[[["MkEWBc","[[\\"{text}\\",\\"auto\\",\\"en\\",true],[null]]",null,"generic"]]]'
         }  # text则是你要翻译的内容
         try:
-            res = requests.post(self.url,headers=self.headers,proxies={'https':'121.20.97.179:27556'},data=data,timeout=3)  # 获取返回的结果
+            res = requests.post(self.url,headers=self.headers,data=data,proxies={'https':'49.69.202.80:35872'},timeout=3)  # 获取返回的结果
         except Exception as e:
             print('超时出现了')
             return None

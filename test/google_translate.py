@@ -123,9 +123,9 @@ class google:
                     pass
                 # print(translate)
 
-    #打开浏览器-> 并且把翻译界面打开 ->调用数据库->循环翻译
+    #调用数据库->循环翻译
     def mysql_google_translate(self):
-        tablename='zhidao_scrapy'
+        tablename='sitemap_scrapy_zh'
         google_object=Googletranslate()
         while self.flag:
             all=self.mysql.table(tablename).where([{'translate':['=',0]}]).count()
@@ -142,9 +142,9 @@ class google:
                     translate.append({'title':title})
                     translate.append({'answer':answer})
                     translate.append({'uid':line[0]})
-                    translate.append({'date':line[3]})
+                    translate.append({'date':'2021-01-22 10:52:58'})
                     print('翻译id:{}的回答,翻译结果为标题:{},内容:{}'.format(line[0],translate[0]['title'][0:20],translate[1]['answer'][0:30],))
-                    insert_flag=self.mysql.table('zhidao_scrapy_en').insert(translate)
+                    insert_flag=self.mysql.table('sitemap_scrapy_en').insert(translate)
                     if insert_flag:
                         update_data = [{'translate':1}]
                         update_flag=self.mysql.table(tablename).where([{'id':['=',line[0]]}]).update(update_data)

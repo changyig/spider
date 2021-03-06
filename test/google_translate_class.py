@@ -3,7 +3,9 @@ import requests
 import json
 import re
 import time
-
+'''
+google翻译接口
+'''
 class Googletranslate:
     def __init__(self):
         self.lang = 'en'
@@ -55,17 +57,21 @@ class Googletranslate:
         else:
             result_list.append(string)
             return result_list
+    '''
+    将特殊字符进行过滤掉，并返回过滤后的结果
+    '''
     def filter_str(self,text=''):
-        cop = re.compile("[^\u4e00-\u9fa5^a-z^A-Z^0-9^（^）^(^)^:^,^.^。^，^-^%^!^?^\n]")  # 匹配不是中文、大小写、数字的其他字符
+        cop = re.compile("[^\u4e00-\u9fa5^a-z^A-Z^0-9^（^）^(^)^:^,^.^。^，^%^!^?^\n^×^、^\-^<^>^=^/^～]")  # 匹配不是中文、大小写、数字的其他字符
         text = cop.sub('',text)
-        text = text.replace("\n",'<br/>').replace("-",'').replace('，',',').replace('。','.')
+        text = text.replace("\n",'<br/>').replace('，',',').replace('。','.')
         return text
     def googleTranslateText(self,text=''):
         data = {
             'f.req':f'[[["MkEWBc","[[\\"{text}\\",\\"auto\\",\\"en\\",true],[null]]",null,"generic"]]]'
         }  # text则是你要翻译的内容
         try:
-            res = requests.post(self.url,headers=self.headers,proxies={'https':'121.20.97.179:27556'},data=data,timeout=3)  # 获取返回的结果
+            # res = requests.post(self.url,headers=self.headers,proxies={'https':'121.20.97.179:27556'},data=data,timeout=3)  # 获取返回的结果
+            res = requests.post(self.url,headers=self.headers,data=data,timeout=3)  # 获取返回的结果
         except Exception as e:
             print('超时出现了')
             return None
@@ -142,7 +148,9 @@ if __name__=="__main__":
     pass
     google=Googletranslate()
     for i in range(1):
-        text = '可逆式制砂机的工作原理是电动机通过皮带传动带动转子旋转，使转子盘上的锤头高速旋转，当物料进入破碎腔时，受到高速旋转锤头的冲击而破碎，并被冲击到反击区，再次进行破碎，另外部分被冲击的石料在运动中撞击到下落的物料，同时进行破碎。这样多次反复冲击、反击、撞击，最终物料形成小颗粒通过锤头和破碎板之间的间隙而排出。'
+        text = '我公司所制造的PXJ 800×400、800800800×600、800×800、1000×1000第三代制砂机(高效细碎机)，是参考各型破碎机的工作原理，并根据用户具体使用情况的信息反馈，结合其优点所设计的新型河卵石制砂机（第三代制砂机）。其典型用途在于适应当前人工机制砂行业，是棒磨式制砂机、冲击式制砂机、直通式制砂机的替代产品。'
+        text = '锤式破碎机（简称锤破）是最常用的一种破碎设备，破碎比大（一般为10%-25%，高者达<=50），生产能力高，产品均匀，过粉现象少，单位产品能耗低，结构简单，设备质量轻，操作维护容易等。'
+        text = '制砂机设备特点与技术优势：1、处理量大，产量高 125mm～1020mm 50-500t/h，与同等功率下的传统设备相比，产量提高了30%而且稳定。2、易损件消耗低 － 最佳的破碎腔物料撞击角度设计，与耐磨件的摩擦少，比传统设备运行费用低40%，直接降低了设备的使用成本。3、产品粒型优异 － 产品呈立方体，粒型好、级配合理、细度模数可调整的特别适合人工制砂和石料整形，实践证明比其它传统设备制砂、整形效果提高30%。4、液压装置，易于维护 － 液压开盖装置，使破碎内部件检修拆换方便快捷，缩短了停机时间，省时省力。5、稀油润滑，自动保养 － 采用原装进口的稀油润滑站，双油泵互补保证供油；无油流、无油压时自动停机；水冷降温，冬季电机加热启动。6、安装简便，易于操作 － 设备重量轻、安装方式多样，可移动式安装；安装、维修和保养简单，操作使用方便；一旦明确具体的用途，制砂机只需进行细微调整，便可最大限度地发挥其卓越的性能。7、一机多用，运用灵活 － 独有的进料破碎结构，拥有多种破碎腔型，可很方便的实现“石打石”和“石打铁”的转换，从而解决了一机多用 的难题。如果需要改变VSI制砂机的应用 ，无需做大的调整，既可适应用户的不同需求：制砂、整型、磨蚀物料等。8、国际品质保证 － 国外最新技术工艺先进的铆接技术应用以及汽车工艺的外观喷砂除夕处理和喷漆工艺应用，极大的提高了设备的内在质量和外观品质。核心零部件均选用国际著名品牌（轴承采用高精度等级的滚动轴承），确保系统低故障率。9、注重环保 － 设备工作噪音小、无污染。独特的空气自循环系统，大大降低了外排风量，降低粉尘，利于环保。此外VSI破碎机预留并适合安装多种规格的除尘设备。'
         print(text)
         text=google.googleTranslate2(text)
         print(text)

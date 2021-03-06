@@ -1,8 +1,12 @@
 from bs4 import BeautifulSoup
 import requests
+from mysql_class import Mysql
 # from urllib3 import request
 import urllib3
 import os
+import datetime
+import time
+from dateutil.relativedelta import *
 
 headers = {
         "user-agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36",
@@ -36,7 +40,24 @@ def test(url):
     path1 = url.split('/')[-1]
     str_list=path1.replace('.html','').split('-')
     str=' '.join(str_list)
-    write_keyword(str)
+    write_filename_keyword('./keyword.txt',str)
+def read_url_keyword():
+    url = 'https://www.capriccio-music.de/sitemap.xml'
+    r = requests.get(url)
+    soup = BeautifulSoup(r.text, "xml")
+    count = soup.find_all(name="loc")
+    num = 0
+    for i in count:
+        url_text=i.string
+        res = requests.get(url_text)
+        soup2 = BeautifulSoup(res.text, "xml")
+        keyword_url = soup2.find_all(name="loc")
+        for word in keyword_url:
+            keyword=word.string
+            if keyword.find('.html')>0:
+                test(keyword)
+                # write_keyword(keyword)
+read_url_keyword()
 def read_keyword(url):
     content = requests.get(url,headers=headers)
     # http = urllib3.https
@@ -52,14 +73,80 @@ def process_url():
         print(i)
         print(url)
         break
+# 字符串格式转换成 2020-02-03 11:05:03
+def time_transform(date):
+    try:
+        time_stamp=time.mktime(time.strptime(date,"%Y-%m-%d"))
+        struct_time = time.localtime(time_stamp)  # 得到结构化时间格式
+        now_time = time.strftime("%Y-%m-%d %H:%M:%S",struct_time)
+        # print(now_time)
+        return now_time
+    except Exception as e:
+        return '00-00-00 00:00:00'
+'''
+返回以每个月为一组的列表
+eg:[{'starttime': '2018-01-01', 'endtime': '2018-01-31'}, {'starttime': '2018-02-01', 'endtime': '2018-02-28'}]
+'''
+def loop_date(starttime='2018-01-01',data=[]):
+    timestamp=int(time.mktime(time.strptime(starttime,"%Y-%m-%d")))
+    now=int(time.time())
+    if timestamp<now:
+        dict_data={}
+        endtime = (datetime.datetime.strptime(starttime,"%Y-%m-%d") + relativedelta(months=+1) - relativedelta(
+            minutes=+1)).strftime("%Y-%m-%d")
+        temptime = (datetime.datetime.strptime(starttime,"%Y-%m-%d") + relativedelta(months=+1)).strftime("%Y-%m-%d")
+        dict_data['starttime']=starttime
+        dict_data['endtime']=endtime
+        data.append(dict_data)
+        loop_date(starttime=temptime,data=data)
+        return data
+    else:
+        return data
+'''
+说明：通过接口获取后台数据的询盘信息
+'''
 def test_url():
-    url='https://www.ftmmachinery.com/blog/stone-crusher-plant-price-for-sale.html'
-    r = requests.get(url,headers=headers)
-    soup = BeautifulSoup(r.text, "html.parser")
-    print(r)
-    print(soup)
-    print(soup.title.string)
+    time_list=loop_date()
+    for list in time_list:
+        data={}
+        url='http://172.16.0.121:807/index.php/index/longword_liebiao'
+        data['starttime']=list['starttime']
+        data['endtime']=list['endtime']
+        get_data=''
+        for item in data.items():
+            if get_data =='':
+                get_data=get_data+item[0]+'='+item[1]
+            else:
+                get_data = get_data +'&' + item[0] + '=' + item[1]
+        url=url+'?'+get_data
+        print(url)
+        r = requests.get(url,headers=headers)
+        res=r.json()
+        # print(res)
+        mysql = Mysql()
+        try:
+            for dict_one in res:
+                insert_data=[]
+                insert_data.append({'person':dict_one['remark1']})
+                insert_data.append({'web':dict_one['host']})
+                insert_data.append({'url':dict_one['url']})
+                insert_data.append({'country':dict_one['area']})
+                insert_data.append({'product':dict_one['key']})
+                insert_data.append({'inquiry_date':dict_one['datetime']})
+                insert_data.append({'online_date':time_transform(dict_one['online_time'])})
+                insert_data.append({'starttime':data['starttime']})
+                insert_data.append({'endtime':data['endtime']})
+                mysql.table('inquiry').insert(insert_data)
+        except Exception as e:
+            print(e)
 # test_url()
+
+
+
+# data=loop_date()
+# print(data)
+# time_transform('2019-12-20')
+
 def write_sitemap():
     url = 'https://www.transports-speciaux.ch/sitemap.xml'
     filename='./sitemap_url.txt'
@@ -77,4 +164,4 @@ def write_sitemap():
             keyword = word.string
             write_filename_keyword(filename,keyword)
 
-write_sitemap()
+# write_sitemap()

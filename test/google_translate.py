@@ -142,7 +142,7 @@ class google:
                     translate.append({'title':title})
                     translate.append({'answer':answer})
                     translate.append({'uid':line[0]})
-                    translate.append({'date':'2021-01-22 10:52:58'})
+                    translate.append({'date':'2021-01-25 10:52:58'})
                     print('翻译id:{}的回答,翻译结果为标题:{},内容:{}'.format(line[0],translate[0]['title'][0:20],translate[1]['answer'][0:30],))
                     insert_flag=self.mysql.table('sitemap_scrapy_en').insert(translate)
                     if insert_flag:

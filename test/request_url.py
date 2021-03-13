@@ -36,11 +36,17 @@ def read_url():
             if keyword.find('.html')>0:
                 # print(keyword)
                 write_keyword(keyword)
+'''
+说明:从含有关键词的url中提取关键词
+'''
 def test(url):
     path1 = url.split('/')[-1]
     str_list=path1.replace('.html','').split('-')
     str=' '.join(str_list)
     write_filename_keyword('./keyword.txt',str)
+'''
+说明:访问网站站点地图，爬取含有完整关键词的url 并存入txt文本中
+'''
 def read_url_keyword():
     url = 'https://www.capriccio-music.de/sitemap.xml'
     r = requests.get(url)
@@ -57,7 +63,7 @@ def read_url_keyword():
             if keyword.find('.html')>0:
                 test(keyword)
                 # write_keyword(keyword)
-read_url_keyword()
+# read_url_keyword()
 def read_keyword(url):
     content = requests.get(url,headers=headers)
     # http = urllib3.https
@@ -140,9 +146,31 @@ def test_url():
         except Exception as e:
             print(e)
 # test_url()
-
-
-
+def url_title(url=''):
+    try:
+        keyword_html=requests.get(url)
+        if keyword_html.status_code ==200:
+            keyword = BeautifulSoup(keyword_html.text,"html.parser")
+            title = keyword.title.string
+        else:
+            title=''
+        return title
+    except Exception as e:
+        return ''
+'''
+说明:读取询盘表中数据 根据数据url更新 title字段
+'''
+def read_mysql_update_title():
+    pass
+    mysql = Mysql()
+    where=[{'url':['!=','']},{'title':['=','']}]
+    # urls=mysql.table('inquiry').field(['id','title','url']).where(where).limit(3).select()
+    urls=mysql.table('inquiry').field(['id','title','url']).where(where).select()
+    for url in urls:
+        print(url[2])
+        res=url_title(url[2])
+        print(res)
+read_mysql_update_title()
 # data=loop_date()
 # print(data)
 # time_transform('2019-12-20')

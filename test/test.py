@@ -2,6 +2,7 @@
 from urllib import request,parse
 import json
 import requests
+import os
 import math
 
 def translate(content):
@@ -69,5 +70,27 @@ def get_ip():
         'http':str(data['data'][0]['ip'])+':'+str(data['data'][0]['port'])
     }
     print(proxy2)
+def download_img():
+    for i in range(1,1000):
+        url=r'https://osiedlewilanowka.pl/img/briquette machine/briquette_machine ('+str(i)+').jpg'
+        response = requests.get(url)
+        if response.status_code == 200:
+            url_para=url.split('/')
+            filename=url_para[-1]
+            dir_path=url_para[-2]
+            dir_path=r'C:\Users\CYG\Desktop/images/'+dir_path
+            isDir=os.path.exists(dir_path)
+            if not isDir:
+                 os.mkdir(dir_path)
+            isFile=os.path.exists(dir_path+'/'+filename)
+            if not isFile:
+                 with open(dir_path+'/'+filename, 'wb') as f:
+                     print('链接地址：{},图片{}下载成功'.format(url,filename))
+                     f.write(response.content)
+            else:
+                print('图片{}文件存在'.format(filename))
+        else:
+            print('不存在图片')
+            break
 if __name__ == '__main__':
-    res=get_ip()
+    res=download_img()

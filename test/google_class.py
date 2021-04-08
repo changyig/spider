@@ -228,7 +228,7 @@ if __name__=="__main__":
             url="https://www.google.com/search?q=site:{}".format(line)
             print(url)
             google.pare_google_url(url)
-            time.sleep(10)
+            time.sleep(3)
             # break
     url="https://www.google.com/search?q=site:salonikkrawiecki.pl&ei=praHX52VMYf7-Qb0ipS4DA&start=0&sa=N&ved=2ahUKEwidgKuWybXsAhWHfd4KHXQFBcc4HhDy0wN6BAgDEDM&biw=1261&bih=889"
     # google=google()

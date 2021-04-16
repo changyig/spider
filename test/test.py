@@ -4,6 +4,7 @@ import json
 import requests
 import os
 import math
+import pymssql
 
 def translate(content):
     url = "http://fanyi.baidu.com/sug"
@@ -92,5 +93,23 @@ def download_img():
         else:
             print('不存在图片')
             break
+def sql():
+    insert_command="insert into google_keyword (keyword,result,list) values ('123',20,30)"
+    connect = pymssql.connect('172.16.10.105','sa','sa','test')  #服务器名,账户,密码,数据库名
+    conn = pymssql.connect(
+        host='172.16.10.105',
+        database='test',
+        user='sa',
+        password='sa'
+    )
+    cur = conn.cursor()
+    cur.execute(insert_command)
+    conn.commit()
+    conn.close()
+    print(conn)
+    if connect:
+        print("连接成功!")
+    return connect
 if __name__ == '__main__':
-    res=download_img()
+    # res=download_img()
+    sql()

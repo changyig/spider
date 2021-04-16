@@ -213,7 +213,7 @@ class google:
         self.next_href=url
         res=self.pare_page_url(count,self.next_href)
         while self.flag :
-            time.sleep(3)
+            time.sleep(1)
             count=count+1
             self.pare_page_url(count,self.next_href)
         self.write_excel(r'C:\Users\CYG\Desktop\data.xlsx',self.records_num,self.records_text)
@@ -221,14 +221,14 @@ if __name__=="__main__":
     # url="https://www.google.com.hk/search?q=site:am-lift.de"
     google = google()
     # google.str_30_page()
-    with open(r"./txt/google_url.txt", 'r', encoding='utf-8') as infiles:
+    with open(r"./txt/other_google_url.txt", 'r', encoding='utf-8') as infiles:
         lines=infiles.readlines()
         for line in lines:
             google.site=line
             url="https://www.google.com/search?q=site:{}".format(line)
             print(url)
             google.pare_google_url(url)
-            time.sleep(3)
+            time.sleep(1)
             # break
     url="https://www.google.com/search?q=site:salonikkrawiecki.pl&ei=praHX52VMYf7-Qb0ipS4DA&start=0&sa=N&ved=2ahUKEwidgKuWybXsAhWHfd4KHXQFBcc4HhDy0wN6BAgDEDM&biw=1261&bih=889"
     # google=google()

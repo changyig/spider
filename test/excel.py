@@ -22,7 +22,7 @@ def write_excel_xls_append(path, value):
     for i in range(0, index):
         new_worksheet.write(i+rows_old, j, value)  # 追加写入数据，注意是从i+rows_old行开始写入
     new_workbook.save(path)  # 保存工作簿
-def write_excel(path,url,nums,remark=''):
+def write_exce(path,url,nums,remark=''):
     # res = re.findall(r'\d+', content)
     # index = len(value)  # 获取需要写入数据的行数
     index = 1  # 获取需要写入数据的行数

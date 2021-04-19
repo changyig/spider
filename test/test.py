@@ -5,6 +5,8 @@ import requests
 import os
 import math
 import pymssql
+import difflib
+import copy
 
 def translate(content):
     url = "http://fanyi.baidu.com/sug"
@@ -110,6 +112,33 @@ def sql():
     if connect:
         print("连接成功!")
     return connect
+'''
+将txt里的内容分成等数量的多个txt文本
+'''
+def split_num_txt(self):
+    filename=r'C:\Users\Administrator\Desktop\linshi.txt'
+    with open(filename, mode='r', encoding='utf-8') as ff:
+        txt1=ff.readlines()
+        print(txt1)
+        txt2=copy.deepcopy(txt1)
+        for index,line in enumerate(txt1):
+            txt2.pop(0)
+            for index2,line2 in enumerate(txt2):
+                print(index,line,index2,line2)
+def stain_one_space(str=''):
+    res=' '.join(str.split())
+    return res
+def compare_string():
+    a='Used  Jaw crusher for the sale'
+    b='used  Jaw crusher for the sale in indiz'
+    a=stain_one_space(a)
+    b=stain_one_space(b)
+    # print(a)
+    res=difflib.SequenceMatcher(None, a.lower(), b.lower()).ratio()
+    print(res)
+def test_site():
+    str1='https://keatsteamympuls.nl/sitemap.xml'
+
 if __name__ == '__main__':
     # res=download_img()
-    sql()
+    compare_string()

@@ -67,7 +67,8 @@ class Googletranslate:
         return text
     def googleTranslateText(self,text=''):
         data = {
-            'f.req':f'[[["MkEWBc","[[\\"{text}\\",\\"auto\\",\\"en\\",true],[null]]",null,"generic"]]]'
+            # 'f.req':f'[[["MkEWBc","[[\\"{text}\\",\\"auto\\",\\"en\\",true],[null]]",null,"generic"]]]'
+            'f.req':f'[[["MkEWBc","[[\\"{text}\\",\\"auto\\",\\"ar\\",true],[null]]",null,"generic"]]]'
         }  # text则是你要翻译的内容
         try:
             # res = requests.post(self.url,headers=self.headers,proxies={'https':'121.20.97.179:27556'},data=data,timeout=3)  # 获取返回的结果
@@ -121,6 +122,7 @@ class Googletranslate:
             # print(text)
             data = {
                 'f.req':f'[[["MkEWBc","[[\\"{text}\\",\\"auto\\",\\"en\\",true],[null]]",null,"generic"]]]'
+                # 'f.req':f'[[["MkEWBc","[[\\"{text}\\",\\"auto\\",\\"uae\\",true],[null]]",null,"generic"]]]'
             }  # text则是你要翻译的内容
             try:
                 res = requests.post(self.url,headers=self.headers,data=data,timeout=3)  # 获取返回的结果

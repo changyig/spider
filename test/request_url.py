@@ -6,6 +6,7 @@ import urllib3
 import os
 import datetime
 import time
+from lxml import etree
 from dateutil.relativedelta import *
 
 headers = {
@@ -170,7 +171,7 @@ def read_mysql_update_title():
         print(url[2])
         res=url_title(url[2])
         print(res)
-read_mysql_update_title()
+# read_mysql_update_title()
 # data=loop_date()
 # print(data)
 # time_transform('2019-12-20')
@@ -192,4 +193,28 @@ def write_sitemap():
             keyword = word.string
             write_filename_keyword(filename,keyword)
 
+
+def write_html():
+    str1='aaaa'
+    with open(r'C:\Users\CYG\Desktop\test.html',mode='w',encoding='utf-8') as f:
+        f.write('aaaa')
+def read_html():
+    with open(r'C:\Users\CYG\Desktop\test.html',mode='r',encoding='utf8') as f:
+        html=f.read()
+        # print(html)
+        # print(f.read())
+        tree = etree.HTML(html)
+        try:
+            keyword_alist=[]
+            a_list = tree.xpath("//div[@id='bres']//a")
+            print(a_list)
+            for a in a_list:
+                print(a)
+                keyword_alist.append(a.xpath("string()"))#注意区分a.xpath("//text()")
+                print(keyword_alist)
+            return keyword_alist
+        except Exception as e:
+            print(e)
+            return []
+read_html()
 # write_sitemap()

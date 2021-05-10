@@ -8,6 +8,7 @@ import re
 import xlwt
 import xlrd
 from xlutils.copy import copy
+import pandas as pd
 from selenium.webdriver.chrome.options import Options
 def write_excel_xls_append(path, value):
     # index = len(value)  # 获取需要写入数据的行数
@@ -49,8 +50,11 @@ def txt_excel():
             url=str[0]
             num=str[1]
             print(url,num)
-            write_excel(excel_filename,url,num)
-txt_excel()
+def pd_read():
+    data=pd.read_excel(r'C:\Users\CYG\Desktop\data.xlsx')
+    print(data)
+    print(data.shape)
+pd_read()
 # file = xlwt.Workbook(encoding = 'utf-8')
 # table = file.add_sheet('data')
 # table.write(0,0,url)

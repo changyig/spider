@@ -51,8 +51,8 @@ def txt_excel():
             num=str[1]
             print(url,num)
 def pd_read():
-    data=pd.read_excel(r'C:\Users\CYG\Desktop\data.xlsx')
-    print(data)
+    data=pd.read_excel(r'C:\Users\CYG\Desktop\data.xlsx',header=None)
+    print(data.iloc[:,[0,1]])
     print(data.shape)
 pd_read()
 # file = xlwt.Workbook(encoding = 'utf-8')

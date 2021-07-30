@@ -11,6 +11,7 @@ import xlrd
 from xlutils.copy import copy
 class google:
     '''
+    功能说明：通过谷歌查询收录 将结果存入道excel文件中
     self.site 访问的网站地址
     self.next_href 下一页地址
     self.records_num 收录的数量
@@ -221,10 +222,10 @@ if __name__=="__main__":
     # url="https://www.google.com.hk/search?q=site:am-lift.de"
     google = google()
     # google.str_30_page()
-    with open(r"./txt/other_google_url.txt", 'r', encoding='utf-8') as infiles:
+    with open(r"./txt/google_url.txt", 'r', encoding='utf-8') as infiles:
         lines=infiles.readlines()
         for line in lines:
-            google.site=line
+            google.site=line.split()
             url="https://www.google.com/search?q=site:{}".format(line)
             print(url)
             google.pare_google_url(url)
